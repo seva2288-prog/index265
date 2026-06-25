@@ -1,1 +1,1982 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Тотал-Апп</title>
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js">
+  </script>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+    body {
+      font-family: -apple-system, 'Segoe UI', Roboto, sans-serif;
+      background: #0b0e14;
+      color: #e0e0e0;
+      height: 100vh;
+      overflow: hidden;
+      user-select: none;
+      transition: background 0.3s, color 0.3s;
+    }
+    body.light {
+      background: #f0f2f5;
+      color: #1a1a1a;
+    }
+    body.light .app-wrapper {
+      background: #f0f2f5;
+    }
+    body.light .header {
+      background: #f0f2f5;
+    }
+    body.light .screen {
+      background: #f0f2f5;
+    }
+    body.light .swipe-indicator {
+      background: #f0f2f5;
+    }
+    body.light .period-buttons button {
+      border-color: #d0d5dd;
+      color: #555;
+    }
+    body.light .period-buttons button.active {
+      background: #f7931a;
+      color: #000;
+      border-color: #f7931a;
+    }
+    body.light .input-row .field input,
+    body.light .timer-row,
+    body.light .forecast-card,
+    body.light .advice-box,
+    body.light .match-name-input,
+    body.light .history-item,
+    body.light .stats-card,
+    body.light .chart-container,
+    body.light .modal-box,
+    body.light .history-filters button,
+    body.light .expected-total,
+    body.light .bk-row,
+    body.light .settings-card {
+      background: #ffffff;
+      color: #1a1a1a;
+    }
+    body.light .timer-row .time-input input {
+      background: #e8ecf1;
+      color: #1a1a1a;
+    }
+    body.light .timer-actions button {
+      background: #d0d5dd;
+      color: #1a1a1a;
+    }
+    body.light .history-filters button {
+      border-color: #d0d5dd;
+      color: #555;
+    }
+    body.light .history-filters button.active {
+      background: #f7931a;
+      color: #000;
+      border-color: #f7931a;
+    }
+    body.light .history-actions button {
+      background: #d0d5dd;
+      color: #1a1a1a;
+    }
+    body.light .history-actions button.danger {
+      background: #fde8e8;
+      color: #b33c3c;
+    }
+    body.light .modal-box select,
+    body.light .modal-box input {
+      background: #e8ecf1;
+      color: #1a1a1a;
+    }
+    body.light .settings-card input,
+    body.light .settings-card select {
+      background: #e8ecf1;
+      color: #1a1a1a;
+    }
 
+    .app-wrapper {
+      max-width: 480px;
+      margin: 0 auto;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      background: #0b0e14;
+      position: relative;
+      overflow: hidden;
+      transition: background 0.3s;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 16px 6px 16px;
+      background: #0b0e14;
+      z-index: 10;
+      flex-shrink: 0;
+      transition: background 0.3s;
+    }
+    .header h1 {
+      font-size: 20px;
+      color: #f7931a;
+      font-weight: 700;
+    }
+    .header-actions {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+    .header-actions button {
+      background: none;
+      border: none;
+      color: #aaa;
+      font-size: 22px;
+      cursor: pointer;
+      padding: 4px;
+      transition: 0.2s;
+    }
+    .header-actions button:active {
+      transform: scale(0.9);
+    }
+    .header-actions .theme-btn {
+      font-size: 24px;
+    }
+
+    .screens-container {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+      position: relative;
+      touch-action: pan-y;
+    }
+
+    .screen {
+      min-width: 100%;
+      height: 100%;
+      overflow-y: auto;
+      padding: 8px 14px 70px 14px;
+      transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+      will-change: transform;
+      background: #0b0e14;
+      scroll-behavior: smooth;
+      -webkit-overflow-scrolling: touch;
+    }
+    .screen::-webkit-scrollbar {
+      width: 2px;
+    }
+    .screen::-webkit-scrollbar-thumb {
+      background: #2a3140;
+      border-radius: 4px;
+    }
+
+    .period-buttons {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+      margin: 2px 0 4px 0;
+    }
+    .period-buttons button {
+      padding: 10px 0;
+      border-radius: 20px;
+      border: 1px solid #2a3140;
+      background: transparent;
+      color: #aaa;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    .period-buttons button.active {
+      background: #f7931a;
+      color: #000;
+      border-color: #f7931a;
+      transform: scale(1.02);
+    }
+    .period-buttons button:active {
+      transform: scale(0.96);
+    }
+
+    .live-button-wrap {
+      margin: 4px 0 6px 0;
+    }
+    .live-button-wrap button {
+      width: 100%;
+      padding: 12px 0;
+      border-radius: 20px;
+      border: 1px solid #2a3140;
+      background: transparent;
+      color: #aaa;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: 0.2s;
+      letter-spacing: 1px;
+    }
+    .live-button-wrap button.active {
+      background: #f7931a;
+      color: #000;
+      border-color: #f7931a;
+      transform: scale(1.01);
+    }
+    .live-button-wrap button:active {
+      transform: scale(0.96);
+    }
+
+    .input-row {
+      display: flex;
+      gap: 10px;
+      margin: 4px 0;
+    }
+    .input-row .field {
+      flex: 1;
+    }
+    .input-row .field label {
+      font-size: 11px;
+      color: #888;
+      display: block;
+      margin-bottom: 2px;
+    }
+    .input-row .field input {
+      width: 100%;
+      padding: 12px 10px;
+      border-radius: 12px;
+      border: none;
+      background: #1a1f2a;
+      color: #fff;
+      font-size: 18px;
+      text-align: center;
+    }
+
+    .scan-area {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: #1a1f2a;
+      padding: 8px 12px;
+      border-radius: 14px;
+      margin: 4px 0 6px 0;
+      cursor: pointer;
+      border: 1px dashed #2a3140;
+      transition: 0.2s;
+    }
+    .scan-area:active {
+      border-color: #f7931a;
+    }
+    .scan-area .scan-label {
+      color: #888;
+      font-size: 13px;
+      font-weight: 600;
+      flex: 1;
+    }
+    .scan-area .scan-icon {
+      font-size: 24px;
+    }
+    .scan-area img {
+      max-height: 60px;
+      border-radius: 10px;
+      object-fit: cover;
+      flex-shrink: 0;
+    }
+    #scanInput {
+      display: none;
+    }
+
+    .timer-row {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin: 6px 0 4px 0;
+      background: #1a1f2a;
+      padding: 12px 14px;
+      border-radius: 16px;
+    }
+    .timer-top {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .timer-top .time {
+      font-size: 40px;
+      font-weight: 700;
+      color: #f7931a;
+      letter-spacing: 2px;
+      min-width: 90px;
+      text-align: center;
+    }
+    .timer-top .time-input {
+      display: flex;
+      gap: 4px;
+      align-items: center;
+      flex: 1;
+      justify-content: center;
+    }
+    .timer-top .time-input input {
+      width: 56px;
+      padding: 10px 4px;
+      text-align: center;
+      border-radius: 10px;
+      border: none;
+      background: #2a3140;
+      color: #fff;
+      font-size: 22px;
+    }
+    .timer-top .time-input span {
+      font-size: 28px;
+      color: #f7931a;
+    }
+    .timer-actions {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+    }
+    .timer-actions button {
+      padding: 12px 0;
+      border-radius: 12px;
+      border: none;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: 0.15s;
+      background: #2a3140;
+      color: #fff;
+    }
+    .timer-actions button:active {
+      transform: scale(0.95);
+    }
+    .timer-actions button.set {
+      background: #f7931a;
+      color: #000;
+    }
+    .timer-actions button.start {
+      background: #2ecc71;
+      color: #000;
+    }
+    .timer-actions button.pause {
+      background: #f1c40f;
+      color: #000;
+    }
+    .timer-actions button.reset {
+      background: #e74c3c;
+      color: #fff;
+    }
+
+    .calc-btn {
+      width: 100%;
+      padding: 12px;
+      border-radius: 14px;
+      border: none;
+      background: #f7931a;
+      color: #000;
+      font-weight: 700;
+      font-size: 17px;
+      cursor: pointer;
+      transition: 0.2s;
+      margin: 4px 0 2px 0;
+    }
+    .calc-btn:active {
+      transform: scale(0.97);
+    }
+    .calc-btn.calculated {
+      background: #2ecc71;
+      color: #000;
+    }
+    .calc-btn.error {
+      background: #e74c3c;
+      color: #fff;
+    }
+
+    .forecast-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+      margin: 8px 0 4px 0;
+    }
+    .forecast-card {
+      background: #1a1f2a;
+      padding: 8px 4px;
+      border-radius: 14px;
+      text-align: center;
+    }
+    .forecast-card .label {
+      font-size: 9px;
+      color: #888;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+    .forecast-card .value {
+      font-size: 22px;
+      font-weight: 700;
+      color: #f7931a;
+      margin-top: 2px;
+    }
+
+    .expected-total {
+      background: #1a1f2a;
+      padding: 12px 16px;
+      border-radius: 14px;
+      margin: 4px 0 6px 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 16px;
+      font-weight: 600;
+      border-left: 6px solid #f7931a;
+    }
+    .expected-total .label {
+      color: #888;
+      font-weight: 400;
+    }
+    .expected-total .value {
+      color: #f7931a;
+      font-weight: 700;
+      font-size: 20px;
+    }
+    .expected-total .comment {
+      font-size: 13px;
+      font-weight: 600;
+      padding: 2px 12px;
+      border-radius: 20px;
+      margin-left: 8px;
+    }
+    .expected-total .comment.green {
+      background: #1a3a1a;
+      color: #2ecc71;
+    }
+    .expected-total .comment.red {
+      background: #3a1a1a;
+      color: #e74c3c;
+    }
+    .expected-total .comment.yellow {
+      background: #3a3a1a;
+      color: #f1c40f;
+    }
+    body.light .expected-total .comment.green {
+      background: #d4edda;
+      color: #155724;
+    }
+    body.light .expected-total .comment.red {
+      background: #f8d7da;
+      color: #721c24;
+    }
+    body.light .expected-total .comment.yellow {
+      background: #fff3cd;
+      color: #856404;
+    }
+
+    .bk-row {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      background: #1a1f2a;
+      padding: 8px 14px;
+      border-radius: 14px;
+      margin: 2px 0 6px 0;
+    }
+    .bk-row label {
+      font-size: 12px;
+      color: #888;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    .bk-row input {
+      flex: 1;
+      padding: 8px 10px;
+      border-radius: 10px;
+      border: none;
+      background: #2a3140;
+      color: #fff;
+      font-size: 16px;
+      text-align: center;
+      min-width: 60px;
+    }
+    .bk-row .bk-comment {
+      font-size: 13px;
+      font-weight: 600;
+      padding: 4px 12px;
+      border-radius: 20px;
+      white-space: nowrap;
+    }
+    .bk-row .bk-comment.green {
+      background: #1a3a1a;
+      color: #2ecc71;
+    }
+    .bk-row .bk-comment.red {
+      background: #3a1a1a;
+      color: #e74c3c;
+    }
+    .bk-row .bk-comment.yellow {
+      background: #3a3a1a;
+      color: #f1c40f;
+    }
+    body.light .bk-row .bk-comment.green {
+      background: #d4edda;
+      color: #155724;
+    }
+    body.light .bk-row .bk-comment.red {
+      background: #f8d7da;
+      color: #721c24;
+    }
+    body.light .bk-row .bk-comment.yellow {
+      background: #fff3cd;
+      color: #856404;
+    }
+
+    .advice-box {
+      background: #1a1f2a;
+      padding: 14px 16px;
+      border-radius: 16px;
+      margin: 6px 0 8px 0;
+      text-align: center;
+      font-size: 18px;
+      font-weight: 700;
+      border-left: 6px solid #f7931a;
+      transition: 0.3s;
+    }
+    .advice-box.good {
+      border-left-color: #2ecc71;
+      color: #2ecc71;
+    }
+    .advice-box.bad {
+      border-left-color: #e74c3c;
+      color: #e74c3c;
+    }
+    .advice-box.wait {
+      border-left-color: #f1c40f;
+      color: #f1c40f;
+    }
+
+    .save-btn {
+      width: 100%;
+      padding: 14px;
+      border-radius: 16px;
+      border: none;
+      background: #f7931a;
+      color: #000;
+      font-size: 17px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: 0.2s;
+      margin: 4px 0;
+    }
+    .save-btn:active {
+      transform: scale(0.97);
+    }
+
+    .match-name-input {
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: 12px;
+      border: none;
+      background: #1a1f2a;
+      color: #fff;
+      font-size: 14px;
+      margin: 2px 0 4px 0;
+    }
+    .match-name-input::placeholder {
+      color: #555;
+    }
+
+    .history-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin: 2px 0 6px 0;
+    }
+    .history-header h2 {
+      font-size: 18px;
+      color: #f7931a;
+    }
+    .history-header .back-btn {
+      background: none;
+      border: none;
+      color: #f7931a;
+      font-size: 28px;
+      cursor: pointer;
+      padding: 0 4px;
+    }
+    .history-header .clear-btn {
+      background: #5a1a1a;
+      color: #ff8a8a;
+      border: none;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 12px;
+      cursor: pointer;
+    }
+
+    .history-filters {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin: 4px 0 10px 0;
+    }
+    .history-filters button {
+      padding: 6px 14px;
+      border-radius: 20px;
+      border: 1px solid #2a3140;
+      background: transparent;
+      color: #aaa;
+      font-size: 12px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    .history-filters button.active {
+      background: #f7931a;
+      color: #000;
+      border-color: #f7931a;
+    }
+    .history-filters button:active {
+      transform: scale(0.95);
+    }
+
+    .history-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      padding-bottom: 12px;
+    }
+    .history-item {
+      background: #1a1f2a;
+      padding: 10px 14px;
+      border-radius: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 13px;
+      cursor: pointer;
+      transition: 0.15s;
+    }
+    .history-item:active {
+      background: #2a3140;
+    }
+    .history-item .left {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .history-item .left .date {
+      color: #888;
+      font-size: 11px;
+    }
+    .history-item .right {
+      text-align: right;
+      font-weight: 600;
+    }
+    .history-item .right .win {
+      color: #2ecc71;
+    }
+    .history-item .right .loss {
+      color: #e74c3c;
+    }
+    .history-item .right .pending {
+      color: #f1c40f;
+    }
+    .history-item .tag {
+      background: #2a3140;
+      padding: 1px 10px;
+      border-radius: 20px;
+      font-size: 10px;
+      color: #aaa;
+      margin-left: 6px;
+    }
+
+    .history-actions {
+      display: flex;
+      gap: 10px;
+      margin: 10px 0;
+    }
+    .history-actions button {
+      flex: 1;
+      padding: 10px;
+      border-radius: 12px;
+      border: none;
+      background: #2a3140;
+      color: #fff;
+      font-size: 14px;
+      cursor: pointer;
+    }
+    .history-actions button:active {
+      transform: scale(0.97);
+    }
+
+    .stats-header {
+      display: flex;
+      align-items: center;
+      margin: 2px 0 6px 0;
+    }
+    .stats-header .back-btn {
+      background: none;
+      border: none;
+      color: #f7931a;
+      font-size: 28px;
+      cursor: pointer;
+      padding: 0 4px;
+      margin-right: 8px;
+    }
+    .stats-header h2 {
+      font-size: 18px;
+      color: #f7931a;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+      margin: 6px 0;
+    }
+    .stats-card {
+      background: #1a1f2a;
+      padding: 12px;
+      border-radius: 14px;
+      text-align: center;
+    }
+    .stats-card .num {
+      font-size: 28px;
+      font-weight: 700;
+      color: #f7931a;
+    }
+    .stats-card .label {
+      font-size: 11px;
+      color: #888;
+    }
+    .stats-card.full {
+      grid-column: span 2;
+    }
+
+    .chart-container {
+      background: #1a1f2a;
+      padding: 12px;
+      border-radius: 14px;
+      margin: 6px 0;
+    }
+    .chart-container .chart-title {
+      font-size: 13px;
+      color: #888;
+      margin-bottom: 6px;
+    }
+    .chart-bars {
+      display: flex;
+      align-items: flex-end;
+      gap: 3px;
+      height: 50px;
+    }
+    .chart-bars .bar {
+      flex: 1;
+      min-width: 6px;
+      border-radius: 3px 3px 0 0;
+      transition: height 0.3s;
+      background: #f7931a;
+    }
+    .chart-bars .bar.loss {
+      background: #e74c3c;
+    }
+
+    .stat-row {
+      background: #1a1f2a;
+      padding: 12px;
+      border-radius: 14px;
+      margin: 6px 0;
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+    }
+    .stat-row .label {
+      color: #888;
+    }
+    .stat-row .value {
+      color: #f7931a;
+      font-weight: 700;
+    }
+
+    .reset-btn {
+      width: 100%;
+      padding: 14px;
+      border-radius: 16px;
+      border: none;
+      background: #2a3140;
+      color: #fff;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      margin: 6px 0;
+    }
+    .reset-btn:active {
+      transform: scale(0.97);
+    }
+
+    .settings-header {
+      display: flex;
+      align-items: center;
+      margin: 2px 0 10px 0;
+    }
+    .settings-header .back-btn {
+      background: none;
+      border: none;
+      color: #f7931a;
+      font-size: 28px;
+      cursor: pointer;
+      padding: 0 4px;
+      margin-right: 8px;
+    }
+    .settings-header h2 {
+      font-size: 18px;
+      color: #f7931a;
+    }
+
+    .settings-card {
+      background: #1a1f2a;
+      padding: 14px 16px;
+      border-radius: 14px;
+      margin: 6px 0;
+    }
+    .settings-card .setting-row {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      margin-bottom: 12px;
+    }
+    .settings-card .setting-row:last-child {
+      margin-bottom: 0;
+    }
+    .settings-card .setting-label {
+      font-size: 14px;
+      font-weight: 600;
+      color: #f7931a;
+    }
+    .settings-card .setting-desc {
+      font-size: 12px;
+      color: #888;
+      line-height: 1.4;
+    }
+    .settings-card input,
+    .settings-card select {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: none;
+      background: #2a3140;
+      color: #fff;
+      font-size: 15px;
+      margin-top: 4px;
+    }
+    .settings-card input[type="range"] {
+      padding: 0;
+      background: transparent;
+      accent-color: #f7931a;
+    }
+    .settings-card .range-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .settings-card .range-row input {
+      flex: 1;
+    }
+    .settings-card .range-row span {
+      font-size: 16px;
+      font-weight: 700;
+      color: #f7931a;
+      min-width: 50px;
+      text-align: right;
+    }
+    .settings-card .toggle-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .settings-card .toggle-row label {
+      font-size: 14px;
+      font-weight: 500;
+    }
+    .settings-card .toggle-row select {
+      width: auto;
+      min-width: 100px;
+      padding: 6px 12px;
+      font-size: 14px;
+    }
+    .settings-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 10px;
+    }
+    .settings-actions button {
+      flex: 1;
+      padding: 12px;
+      border-radius: 12px;
+      border: none;
+      font-weight: 600;
+      font-size: 15px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    .settings-actions button:active {
+      transform: scale(0.97);
+    }
+    .settings-actions .save-btn-setting {
+      background: #f7931a;
+      color: #000;
+    }
+    .settings-actions .reset-btn-setting {
+      background: #2a3140;
+      color: #fff;
+    }
+    body.light .settings-actions .reset-btn-setting {
+      background: #d0d5dd;
+      color: #1a1a1a;
+    }
+
+    .swipe-indicator {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      padding: 6px 0 10px 0;
+      background: #0b0e14;
+      flex-shrink: 0;
+      position: relative;
+      z-index: 5;
+      transition: background 0.3s;
+    }
+    .swipe-indicator .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #2a3140;
+      transition: 0.3s;
+      cursor: pointer;
+    }
+    .swipe-indicator .dot.active {
+      background: #f7931a;
+      width: 24px;
+      border-radius: 6px;
+    }
+
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.7);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      padding: 20px;
+    }
+    .modal-overlay.show {
+      display: flex;
+    }
+    .modal-box {
+      background: #1a1f2a;
+      padding: 24px;
+      border-radius: 24px;
+      max-width: 360px;
+      width: 100%;
+    }
+    .modal-box h3 {
+      color: #f7931a;
+      margin-bottom: 12px;
+      text-align: center;
+    }
+    .modal-box label {
+      font-size: 13px;
+      color: #aaa;
+      display: block;
+      margin: 8px 0 2px 0;
+    }
+    .modal-box select,
+    .modal-box input {
+      width: 100%;
+      padding: 10px;
+      border-radius: 12px;
+      border: none;
+      background: #2a3140;
+      color: #fff;
+      font-size: 15px;
+    }
+    .modal-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 16px;
+    }
+    .modal-actions button {
+      flex: 1;
+      padding: 12px;
+      border-radius: 12px;
+      border: none;
+      font-weight: 600;
+      font-size: 15px;
+      cursor: pointer;
+    }
+    .modal-actions .save {
+      background: #f7931a;
+      color: #000;
+    }
+    .modal-actions .cancel {
+      background: #2a3140;
+      color: #fff;
+    }
+
+    .text-muted {
+      color: #555;
+    }
+    .text-center {
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="appScreen" class="app-wrapper">
+
+    <!-- ШАПКА -->
+    <div class="header">
+      <h1>🧠 Тотал-Апп</h1>
+      <div class="header-actions">
+        <button class="theme-btn" onclick="toggleTheme()" id="themeBtn">🌙</button>
+        <button onclick="exportData()" title="Экспорт">📤</button>
+      </div>
+    </div>
+
+    <!-- КОНТЕЙНЕР ЭКРАНОВ -->
+    <div class="screens-container" id="screensContainer">
+
+      <!-- ====== ЭКРАН 1: МАТЧ ====== -->
+      <div class="screen" id="screenMatch">
+        <div class="period-buttons" id="periodButtons">
+          <button data-period="1" onclick="setPeriod('1', this)">1-я</button>
+          <button data-period="2" class="active" onclick="setPeriod('2', this)">2-я</button>
+          <button data-period="3" onclick="setPeriod('3', this)">3-я</button>
+          <button data-period="half" onclick="setPeriod('half', this)">2-я пол.</button>
+        </div>
+        <div class="live-button-wrap">
+          <button data-period="live" onclick="setPeriod('live', this)">⚡ Текущая (Live)</button>
+        </div>
+        <div class="input-row">
+          <div class="field">
+            <label>🧮 Очки за четв.</label>
+            <input type="number" id="score" placeholder="28" />
+          </div>
+          <div class="field">
+            <label>⚖️ Разница</label>
+            <input type="number" id="diff" placeholder="14" value="0" />
+          </div>
+        </div>
+        <div class="scan-area" onclick="document.getElementById('scanInput').click()">
+          <span class="scan-icon">📷</span>
+          <span class="scan-label">Загрузить скриншот</span>
+          <img id="scanPreview" style="display:none;" />
+        </div>
+        <input type="file" id="scanInput" accept="image/*" onchange="scanImage(event)" />
+        <div class="timer-row">
+          <div class="timer-top">
+            <div class="time" id="timerDisplay">10:00</div>
+            <div class="time-input">
+              <input type="number" id="timerMinutes" placeholder="7" min="0" max="10" />
+              <span>:</span>
+              <input type="number" id="timerSeconds" placeholder="28" min="0" max="59" />
+            </div>
+          </div>
+          <div class="timer-actions">
+            <button class="set" onclick="setTimerFromInput()">⏱ Уст.</button>
+            <button class="start" onclick="startTimer()">▶ Старт</button>
+            <button class="pause" onclick="pauseTimer()">⏸ Пауза</button>
+            <button class="reset" onclick="resetTimer()">⟳ Сброс</button>
+          </div>
+        </div>
+        <button class="calc-btn" onclick="handleCalculate()">⚡ Рассчитать</button>
+        <div class="forecast-grid">
+          <div class="forecast-card"><div class="label">До конца</div><div class="value" id="forecastCurrent">--</div></div>
+          <div class="forecast-card"><div class="label">След. четв.</div><div class="value" id="forecastNext">--</div></div>
+          <div class="forecast-card"><div class="label">2-я пол.</div><div class="value" id="forecastHalf">--</div></div>
+          <div class="forecast-card"><div class="label">Матч</div><div class="value" id="forecastMatch">--</div></div>
+        </div>
+        <div class="expected-total" id="expectedTotal">
+          <span class="label">📊 Ожидаемый тотал:</span>
+          <span style="display:flex; align-items:center; gap:8px;">
+            <span class="value" id="totalValue">--</span>
+            <span class="comment" id="totalComment"></span>
+          </span>
+        </div>
+        <div class="bk-row">
+          <label>📈 Линия БК:</label>
+          <input type="number" id="bkLine" placeholder="Например: 43.5" step="0.5" />
+          <span class="bk-comment" id="bkComment">—</span>
+        </div>
+        <div class="advice-box wait" id="adviceBox">⏳ Ожидание данных...</div>
+        <input class="match-name-input" id="matchName" placeholder="Название матча (необязательно)" />
+        <button class="save-btn" onclick="saveAdvice()">💾 Сохранить ставку</button>
+        <input type="hidden" id="odds" value="1.85" />
+      </div>
+
+      <!-- ====== ЭКРАН 2: ИСТОРИЯ ====== -->
+      <div class="screen" id="screenHistory">
+        <div class="history-header">
+          <button class="back-btn" onclick="goToScreen(0)">‹</button>
+          <h2>📜 История</h2>
+          <button class="clear-btn" onclick="clearHistory()">🗑️ Очистить</button>
+        </div>
+        <div class="history-filters" id="historyFilters">
+          <button class="active" data-filter="all" onclick="setFilter('all', this)">Все</button>
+          <button data-filter="tb" onclick="setFilter('tb', this)">ТБ</button>
+          <button data-filter="tm" onclick="setFilter('tm', this)">ТМ</button>
+          <button data-filter="win" onclick="setFilter('win', this)">✅</button>
+          <button data-filter="loss" onclick="setFilter('loss', this)">❌</button>
+          <button data-filter="pending" onclick="setFilter('pending', this)">⏳</button>
+        </div>
+        <div class="history-list" id="historyList"><div class="text-muted text-center" style="padding:20px 0;">Пока нет ставок</div></div>
+        <div class="history-actions">
+          <button onclick="exportData()">📤 Экспорт</button>
+          <button onclick="document.getElementById('importFile').click()">📥 Импорт</button>
+          <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(event)" />
+        </div>
+      </div>
+
+      <!-- ====== ЭКРАН 3: СТАТИСТИКА ====== -->
+      <div class="screen" id="screenStats">
+        <div class="stats-header">
+          <button class="back-btn" onclick="goToScreen(0)">‹</button>
+          <h2>📊 Статистика</h2>
+        </div>
+        <div class="stats-grid" id="statsGrid">
+          <div class="stats-card"><div class="num" id="statTotal">0</div><div class="label">Всего</div></div>
+          <div class="stats-card"><div class="num" id="statWinRate">0%</div><div class="label">% побед</div></div>
+          <div class="stats-card"><div class="num" id="statBalance">0</div><div class="label">Баланс</div></div>
+          <div class="stats-card"><div class="num" id="statROI">0%</div><div class="label">ROI</div></div>
+          <div class="stats-card full"><div class="num" id="statBest">-</div><div class="label">Лучшая ставка</div></div>
+        </div>
+        <div class="chart-container">
+          <div class="chart-title">📈 График баланса (последние 20)</div>
+          <div class="chart-bars" id="chartBars"></div>
+        </div>
+        <div class="stat-row"><span class="label">Лучшая четверть</span><span class="value" id="statBestQuarter">-</span></div>
+        <button class="reset-btn" onclick="resetAll()">🔄 Сбросить все данные</button>
+      </div>
+
+      <!-- ====== ЭКРАН 4: НАСТРОЙКИ ====== -->
+      <div class="screen" id="screenSettings">
+        <div class="settings-header">
+          <button class="back-btn" onclick="goToScreen(0)">‹</button>
+          <h2>⚙️ Настройки</h2>
+        </div>
+
+        <div class="settings-card">
+          <div class="setting-row">
+            <div class="setting-label">⚙️ Базовый темп</div>
+            <div class="setting-desc">Средняя скорость игры в этой лиге (очков в минуту).<br>
+              <b>3.5</b> — женский баскетбол, <b>4.0</b> — мужской, <b>3.2</b> — молодёжь.<br>
+              Чем выше число → тем чаще алгоритм будет давать <b>ТБ</b>.</div>
+            <input type="number" id="baseTempo" step="0.1" min="2.0" max="5.0" />
+          </div>
+
+          <div class="setting-row">
+            <div class="setting-label">🎯 Чувствительность</div>
+            <div class="setting-desc">Насколько сильно алгоритм реагирует на отклонение темпа от нормы.<br>
+              <b>10%</b> — жёстко (чаще ТБ/ТМ). <b>20%</b> — мягко (чаще ЖДИ).</div>
+            <div class="range-row">
+              <input type="range" id="sensitivity" min="5" max="25" step="1" />
+              <span id="sensitivityValue">15%</span>
+            </div>
+          </div>
+
+          <div class="setting-row">
+            <div class="setting-label">⚖️ Поправка на разницу</div>
+            <div class="setting-desc">При большой разнице игра замедляется, при маленькой — ускоряется.<br>
+              <b>> 20 очков</b> → умножаем темп на <span id="diffHighLabel">0.85</span><br>
+              <b>< 5 очков</b> → умножаем темп на <span id="diffLowLabel">1.15</span></div>
+            <div style="display:flex; gap:10px; margin-top:4px;">
+              <input type="number" id="diffHigh" step="0.05" min="0.5" max="1.0" style="flex:1;" />
+              <input type="number" id="diffLow" step="0.05" min="1.0" max="1.5" style="flex:1;" />
+            </div>
+          </div>
+
+          <div class="setting-row">
+            <div class="setting-label">🔄 Авто-обновление</div>
+            <div class="setting-desc">Как часто обновлять прогнозы при включённом таймере.<br>
+              <b>10 сек</b> — чаще, <b>60 сек</b> — реже.</div>
+            <select id="updateInterval">
+              <option value="10">10 секунд</option>
+              <option value="30" selected>30 секунд</option>
+              <option value="60">60 секунд</option>
+            </select>
+          </div>
+
+          <div class="setting-row">
+            <div class="setting-label">🚩 Показывать флаги</div>
+            <div class="setting-desc">Предупреждения о рисках (сушка, травмы).<br>
+              Если надоели — выключите.</div>
+            <div class="toggle-row">
+              <label>Показывать предупреждения</label>
+              <select id="showFlags">
+                <option value="true">✅ Включено</option>
+                <option value="false">❌ Выключено</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="setting-row">
+            <div class="setting-label">📥 Тестовые данные при старте</div>
+            <div class="setting-desc">При первом запуске показывать пример:<br>
+              <b>28 очков, разница 14, время 10:00</b></div>
+            <div class="toggle-row">
+              <label>Показывать при запуске</label>
+              <select id="showTestData">
+                <option value="true">✅ Включено</option>
+                <option value="false">❌ Выключено</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="settings-actions">
+          <button class="save-btn-setting" onclick="saveSettings()">💾 Сохранить настройки</button>
+          <button class="reset-btn-setting" onclick="resetSettings()">🔄 Сбросить по умолчанию</button>
+        </div>
+        <div style="margin-top:8px; font-size:12px; color:#555; text-align:center;" id="settingsStatus"></div>
+      </div>
+
+    </div>
+
+    <!-- ИНДИКАТОР СВАЙПА (4 точки) -->
+    <div class="swipe-indicator">
+      <div class="dot active" data-index="0"></div>
+      <div class="dot" data-index="1"></div>
+      <div class="dot" data-index="2"></div>
+      <div class="dot" data-index="3"></div>
+    </div>
+
+    <!-- МОДАЛ -->
+    <div class="modal-overlay" id="editModal">
+      <div class="modal-box">
+        <h3>✏️ Редактировать</h3>
+        <label>Исход</label>
+        <select id="editOutcome">
+          <option value="win">✅ Выиграла</option>
+          <option value="loss">❌ Проиграла</option>
+          <option value="pending">⏳ Неизвестно</option>
+        </select>
+        <label>Тег</label>
+        <input type="text" id="editTag" placeholder="Тег" />
+        <label>Коэффициент</label>
+        <input type="number" id="editOdds" step="0.01" placeholder="1.85" />
+        <div class="modal-actions">
+          <button class="save" onclick="saveEdit()">💾 Сохранить</button>
+          <button class="cancel" onclick="closeEdit()">❌ Отмена</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ===== ХРАНИЛИЩЕ =====
+    let bets = JSON.parse(localStorage.getItem('bets')) || [];
+    let currentFilter = 'all';
+    let editIndex = -1;
+    let currentPeriod = '2';
+
+    // ===== НАСТРОЙКИ =====
+    const DEFAULT_SETTINGS = {
+      baseTempo: 3.5,
+      sensitivity: 15,
+      diffHigh: 0.85,
+      diffLow: 1.15,
+      updateInterval: 30,
+      showFlags: true,
+      showTestData: true
+    };
+
+    let settings = JSON.parse(localStorage.getItem('settings')) || { ...DEFAULT_SETTINGS };
+
+    function loadSettings() {
+      document.getElementById('baseTempo').value = settings.baseTempo;
+      document.getElementById('sensitivity').value = settings.sensitivity;
+      document.getElementById('sensitivityValue').textContent = settings.sensitivity + '%';
+      document.getElementById('diffHigh').value = settings.diffHigh;
+      document.getElementById('diffLow').value = settings.diffLow;
+      document.getElementById('diffHighLabel').textContent = settings.diffHigh.toFixed(2);
+      document.getElementById('diffLowLabel').textContent = settings.diffLow.toFixed(2);
+      document.getElementById('updateInterval').value = settings.updateInterval;
+      document.getElementById('showFlags').value = settings.showFlags ? 'true' : 'false';
+      document.getElementById('showTestData').value = settings.showTestData ? 'true' : 'false';
+    }
+
+    function saveSettings() {
+      settings.baseTempo = parseFloat(document.getElementById('baseTempo').value) || 3.5;
+      settings.sensitivity = parseInt(document.getElementById('sensitivity').value) || 15;
+      settings.diffHigh = parseFloat(document.getElementById('diffHigh').value) || 0.85;
+      settings.diffLow = parseFloat(document.getElementById('diffLow').value) || 1.15;
+      settings.updateInterval = parseInt(document.getElementById('updateInterval').value) || 30;
+      settings.showFlags = document.getElementById('showFlags').value === 'true';
+      settings.showTestData = document.getElementById('showTestData').value === 'true';
+
+      document.getElementById('sensitivityValue').textContent = settings.sensitivity + '%';
+      document.getElementById('diffHighLabel').textContent = settings.diffHigh.toFixed(2);
+      document.getElementById('diffLowLabel').textContent = settings.diffLow.toFixed(2);
+
+      localStorage.setItem('settings', JSON.stringify(settings));
+      document.getElementById('settingsStatus').textContent = '✅ Настройки сохранены!';
+      setTimeout(() => { document.getElementById('settingsStatus').textContent = ''; }, 2000);
+
+      if (timerInterval) {
+        stopTimer();
+        startTimer();
+      }
+      updateAll();
+    }
+
+    function resetSettings() {
+      if (confirm('Сбросить все настройки по умолчанию?')) {
+        settings = { ...DEFAULT_SETTINGS };
+        localStorage.setItem('settings', JSON.stringify(settings));
+        loadSettings();
+        document.getElementById('settingsStatus').textContent = '🔄 Настройки сброшены!';
+        setTimeout(() => { document.getElementById('settingsStatus').textContent = ''; }, 2000);
+        if (timerInterval) {
+          stopTimer();
+          startTimer();
+        }
+        updateAll();
+      }
+    }
+
+    // ===== ТЕМА =====
+    function toggleTheme() {
+      document.body.classList.toggle('light');
+      const btn = document.getElementById('themeBtn');
+      btn.textContent = document.body.classList.contains('light') ? '☀️' : '🌙';
+      localStorage.setItem('theme', document.body.classList.contains('light') ? 'light' : 'dark');
+    }
+    if (localStorage.getItem('theme') === 'light') {
+      document.body.classList.add('light');
+      document.getElementById('themeBtn').textContent = '☀️';
+    }
+
+    // ===== ТАЙМЕР =====
+    let timerInterval = null;
+    let secondsLeft = 600;
+    let updateCounter = 0;
+
+    // Функция для получения текущего времени (из полей или дисплея)
+    function getCurrentTime() {
+      const mins = parseInt(document.getElementById('timerMinutes').value);
+      const secs = parseInt(document.getElementById('timerSeconds').value);
+      
+      // Если поля пустые или 0 — берём 10:00
+      if (isNaN(mins) || isNaN(secs) || (mins === 0 && secs === 0)) {
+        return 600; // 10:00
+      }
+      // Если поля заполнены — берём их
+      if (mins >= 0 && mins <= 10 && secs >= 0 && secs <= 59) {
+        return mins * 60 + secs;
+      }
+      return 600;
+    }
+
+    function setTimerFromInput() {
+      const mins = parseInt(document.getElementById('timerMinutes').value) || 0;
+      const secs = parseInt(document.getElementById('timerSeconds').value) || 0;
+      if (mins < 0 || mins > 10 || secs < 0 || secs > 59) {
+        alert('❌ Введите корректное время (0–10 мин, 0–59 сек)');
+        return;
+      }
+      secondsLeft = mins * 60 + secs;
+      updateTimerDisplay();
+      updateAll();
+    }
+
+    function startTimer() {
+      if (timerInterval) return;
+      updateCounter = 0;
+      const interval = settings.updateInterval || 30;
+      timerInterval = setInterval(() => {
+        secondsLeft = Math.max(0, secondsLeft - 1);
+        updateTimerDisplay();
+        updateCounter++;
+        if (updateCounter >= interval) {
+          updateCounter = 0;
+          updateAll();
+        }
+        if (secondsLeft <= 0) {
+          stopTimer();
+          alert('⏰ Четверть окончена!');
+        }
+      }, 1000);
+      updateAll();
+    }
+
+    function pauseTimer() {
+      clearInterval(timerInterval);
+      timerInterval = null;
+    }
+
+    function stopTimer() {
+      clearInterval(timerInterval);
+      timerInterval = null;
+    }
+
+    function resetTimer() {
+      stopTimer();
+      secondsLeft = 600;
+      updateCounter = 0;
+      updateTimerDisplay();
+      document.getElementById('timerMinutes').value = '';
+      document.getElementById('timerSeconds').value = '';
+      updateAll();
+    }
+
+    function updateTimerDisplay() {
+      const mins = Math.floor(secondsLeft / 60);
+      const secs = secondsLeft % 60;
+      document.getElementById('timerDisplay').textContent =
+        `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+      // Обновляем поля, только если они пустые или в них 0
+      const minsInput = document.getElementById('timerMinutes');
+      const secsInput = document.getElementById('timerSeconds');
+      if (!minsInput.value || minsInput.value === '0') minsInput.value = mins;
+      if (!secsInput.value || secsInput.value === '0') secsInput.value = secs;
+    }
+
+    // ===== ПРОГНОЗЫ =====
+    function updateForecasts() {
+      const score = parseInt(document.getElementById('score').value);
+      const timeLeft = getCurrentTime() / 60;
+      if (!score || score < 0 || timeLeft <= 0) {
+        document.getElementById('forecastCurrent').textContent = '--';
+        document.getElementById('forecastNext').textContent = '--';
+        document.getElementById('forecastHalf').textContent = '--';
+        document.getElementById('forecastMatch').textContent = '--';
+        return;
+      }
+      const minutesPlayed = 10 - timeLeft;
+      const tempo = minutesPlayed > 0 ? score / minutesPlayed : 0;
+      document.getElementById('forecastCurrent').textContent = Math.round(tempo * timeLeft);
+      document.getElementById('forecastNext').textContent = Math.round(tempo * 10);
+      document.getElementById('forecastHalf').textContent = Math.round(tempo * 20);
+      document.getElementById('forecastMatch').textContent = Math.round(tempo * 40);
+    }
+
+    // ===== ОЖИДАЕМЫЙ ТОТАЛ =====
+    function updateExpectedTotal() {
+      const period = currentPeriod;
+      const totalEl = document.getElementById('totalValue');
+      const commentEl = document.getElementById('totalComment');
+
+      let value = '--';
+      if (period === '1' || period === '2' || period === '3') {
+        value = document.getElementById('forecastNext').textContent;
+      } else if (period === 'half') {
+        value = document.getElementById('forecastHalf').textContent;
+      } else if (period === 'live') {
+        value = document.getElementById('forecastCurrent').textContent;
+      }
+
+      totalEl.textContent = value;
+
+      if (value === '--' || value === 'NaN') {
+        commentEl.textContent = '';
+        commentEl.className = 'comment';
+        return;
+      }
+
+      const numValue = parseFloat(value);
+      const bkLine = parseFloat(document.getElementById('bkLine').value);
+
+      if (isNaN(bkLine) || bkLine <= 0) {
+        commentEl.textContent = 'введите линию БК';
+        commentEl.className = 'comment yellow';
+        return;
+      }
+
+      const diff = numValue - bkLine;
+      if (Math.abs(diff) < 1.5) {
+        commentEl.textContent = '🟡 линия близка';
+        commentEl.className = 'comment yellow';
+      } else if (diff > 1.5) {
+        commentEl.textContent = '🟢 БК занижена → можно ТБ';
+        commentEl.className = 'comment green';
+      } else if (diff < -1.5) {
+        commentEl.textContent = '🔴 БК завышена → можно ТМ';
+        commentEl.className = 'comment red';
+      }
+    }
+
+    // ===== РЕКОМЕНДАЦИЯ =====
+    function calculateAdvice() {
+      const period = currentPeriod;
+      const score = parseInt(document.getElementById('score').value);
+      const diff = parseInt(document.getElementById('diff').value) || 0;
+      const timeLeft = getCurrentTime() / 60;
+
+      if (!score || score < 0 || timeLeft <= 0) {
+        return { advice: '⏳ Ожидание данных...', cls: 'wait' };
+      }
+
+      const minutesPlayed = 10 - timeLeft;
+      const tempo = minutesPlayed > 0 ? score / minutesPlayed : 0;
+
+      const BASE_TEMPO = settings.baseTempo || 3.5;
+      const SENSITIVITY = (settings.sensitivity || 15) / 100;
+      const DIFF_HIGH = settings.diffHigh || 0.85;
+      const DIFF_LOW = settings.diffLow || 1.15;
+
+      let diffFactor = 1;
+      if (diff > 20) diffFactor = DIFF_HIGH;
+      else if (diff < 5) diffFactor = DIFF_LOW;
+
+      const adjustedTempo = tempo * diffFactor;
+
+      let advice = '',
+        cls = 'wait';
+      let timeFactor = timeLeft >= 7 ? 'start' : timeLeft >= 3 ? 'middle' : 'end';
+
+      const upperThreshold = BASE_TEMPO * (1 + SENSITIVITY);
+      const lowerThreshold = BASE_TEMPO * (1 - SENSITIVITY);
+
+      if (adjustedTempo > upperThreshold) {
+        advice = 'ТБ';
+        cls = 'good';
+      } else if (adjustedTempo < lowerThreshold) {
+        advice = 'ТМ';
+        cls = 'bad';
+      } else {
+        advice = '⏳ ЖДИ (темп близок к норме)';
+        cls = 'wait';
+      }
+
+      let periodLabel = '';
+      if (period === '1') periodLabel = '2-й четверти';
+      else if (period === '2') periodLabel = '3-й четверти';
+      else if (period === '3') periodLabel = '4-й четверти';
+      else if (period === 'half') periodLabel = '2-й половины';
+      else if (period === 'live') periodLabel = 'оставшейся части';
+
+      if (cls !== 'wait') {
+        advice = `${advice} ${periodLabel}`;
+      }
+
+      if (timeFactor === 'start' && cls === 'good') advice += ' (осторожно, начало)';
+      else if (timeFactor === 'middle' && cls !== 'wait') advice += ' (усилено)';
+      else if (timeFactor === 'end' && cls === 'good') advice += ' (концовка, может быть сушка)';
+      else if (timeFactor === 'end' && cls === 'bad') advice += ' (концовка, риск)';
+
+      return { advice, cls };
+    }
+
+    function updateAdvice() {
+      const result = calculateAdvice();
+      const box = document.getElementById('adviceBox');
+      box.textContent = `📊 ${result.advice}`;
+      box.className = `advice-box ${result.cls}`;
+    }
+
+    function updateAll() {
+      updateForecasts();
+      updateAdvice();
+      updateExpectedTotal();
+    }
+
+    // ===== ОБРАБОТКА КНОПКИ "РАССЧИТАТЬ" =====
+    function handleCalculate() {
+      const score = parseInt(document.getElementById('score').value);
+      const timeLeft = getCurrentTime() / 60;
+
+      if (!score || score < 0) {
+        const btn = document.querySelector('.calc-btn');
+        btn.textContent = '⚠️ Введите очки!';
+        btn.className = 'calc-btn error';
+        setTimeout(() => {
+          btn.textContent = '⚡ Рассчитать';
+          btn.className = 'calc-btn';
+        }, 2000);
+        return;
+      }
+
+      if (timeLeft <= 0) {
+        const btn = document.querySelector('.calc-btn');
+        btn.textContent = '⚠️ Установите время!';
+        btn.className = 'calc-btn error';
+        setTimeout(() => {
+          btn.textContent = '⚡ Рассчитать';
+          btn.className = 'calc-btn';
+        }, 2000);
+        return;
+      }
+
+      updateAll();
+      const btn = document.querySelector('.calc-btn');
+      btn.textContent = '✅ Рассчитано!';
+      btn.className = 'calc-btn calculated';
+      setTimeout(() => {
+        btn.textContent = '⚡ Рассчитать';
+        btn.className = 'calc-btn';
+      }, 1500);
+    }
+
+    // ===== ПЕРИОД =====
+    function setPeriod(val, btn) {
+      currentPeriod = val;
+      document.querySelectorAll('.period-buttons button, .live-button-wrap button').forEach(b => b.classList.remove('active'));
+      if (btn) btn.classList.add('active');
+
+      if (val !== 'live') {
+        stopTimer();
+        secondsLeft = 600;
+        updateCounter = 0;
+        // Очищаем поля ввода времени
+        document.getElementById('timerMinutes').value = '';
+        document.getElementById('timerSeconds').value = '';
+        updateTimerDisplay();
+        updateAll();
+      } else {
+        // Для Live — оставляем поля как есть
+        updateAll();
+      }
+    }
+
+    // ===== СОХРАНИТЬ СТАВКУ =====
+    function saveAdvice() {
+      const score = parseInt(document.getElementById('score').value);
+      if (!score || score < 0) {
+        alert('⚠️ Введите сумму очков');
+        return;
+      }
+
+      const result = calculateAdvice();
+      const advice = result.advice;
+      const diff = parseInt(document.getElementById('diff').value) || 0;
+      const match = document.getElementById('matchName').value || 'Матч';
+
+      const activeBtn = document.querySelector('.period-buttons button.active, .live-button-wrap button.active');
+      const periodLabel = activeBtn ? activeBtn.textContent.trim() : '2-я';
+
+      const bet = {
+        date: new Date().toLocaleString(),
+        match: match,
+        advice: advice,
+        score: score,
+        diff: diff,
+        period: periodLabel,
+        tag: '',
+        odds: 1.85,
+        forecastCurrent: document.getElementById('forecastCurrent').textContent,
+        forecastNext: document.getElementById('forecastNext').textContent,
+        forecastHalf: document.getElementById('forecastHalf').textContent,
+        forecastMatch: document.getElementById('forecastMatch').textContent,
+        expectedTotal: document.getElementById('totalValue').textContent,
+        outcome: 'pending',
+        result: '⏳ Ожидание'
+      };
+      bets.push(bet);
+      localStorage.setItem('bets', JSON.stringify(bets));
+      renderAll();
+      document.getElementById('adviceBox').textContent = '✅ Сохранено!';
+      setTimeout(() => updateAdvice(), 1500);
+    }
+
+    // ===== СКАНЕР =====
+    async function scanImage(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const preview = document.getElementById('scanPreview');
+      preview.style.display = 'block';
+      preview.src = URL.createObjectURL(file);
+      try {
+        const result = await Tesseract.recognize(file, 'rus+eng', { logger: m => console.log(m) });
+        const text = result.data.text;
+        const numbers = [];
+        const lines = text.split('\n');
+        for (let line of lines) {
+          if (line.includes(':')) continue;
+          const found = line.match(/\d+/g);
+          if (found) {
+            found.forEach(num => numbers.push(parseInt(num)));
+          }
+        }
+        if (numbers.length >= 2) {
+          const num1 = numbers[numbers.length - 2];
+          const num2 = numbers[numbers.length - 1];
+          if (num1 > 0 && num2 > 0) {
+            document.getElementById('score').value = num1 + num2;
+            document.getElementById('diff').value = Math.abs(num1 - num2);
+            alert(`✅ Распознано: ${num1} и ${num2}`);
+            updateAll();
+          }
+        } else {
+          alert(`❌ Не удалось найти счет. Сканер увидел:\n"${text.slice(0, 100)}..."`);
+        }
+      } catch (e) {
+        alert('❌ Ошибка OCR: ' + e.message);
+      }
+      event.target.value = '';
+    }
+
+    // ===== РЕДАКТИРОВАНИЕ =====
+    function openEdit(index) {
+      editIndex = index;
+      const b = bets[index];
+      document.getElementById('editOutcome').value = b.outcome || 'pending';
+      document.getElementById('editTag').value = b.tag || '';
+      document.getElementById('editOdds').value = b.odds || 1.85;
+      document.getElementById('editModal').classList.add('show');
+    }
+
+    function closeEdit() {
+      document.getElementById('editModal').classList.remove('show');
+      editIndex = -1;
+    }
+
+    function saveEdit() {
+      if (editIndex < 0 || editIndex >= bets.length) return;
+      const b = bets[editIndex];
+      b.outcome = document.getElementById('editOutcome').value;
+      b.tag = document.getElementById('editTag').value;
+      b.odds = parseFloat(document.getElementById('editOdds').value) || 1.85;
+      b.result = b.outcome === 'win' ? '✅ Выигрыш' : b.outcome === 'loss' ? '❌ Проигрыш' : '⏳ Ожидание';
+      localStorage.setItem('bets', JSON.stringify(bets));
+      closeEdit();
+      renderAll();
+    }
+
+    // ===== ФИЛЬТРЫ =====
+    function setFilter(filter, btn) {
+      currentFilter = filter;
+      document.querySelectorAll('#historyFilters button').forEach(b => b.classList.remove('active'));
+      if (btn) btn.classList.add('active');
+      renderHistory();
+    }
+
+    // ===== ОТРИСОВКА =====
+    function renderAll() {
+      renderHistory();
+      renderStats();
+      renderChart();
+    }
+
+    function renderHistory() {
+      const list = document.getElementById('historyList');
+      let filtered = bets;
+      if (currentFilter === 'win') filtered = bets.filter(b => b.outcome === 'win');
+      else if (currentFilter === 'loss') filtered = bets.filter(b => b.outcome === 'loss');
+      else if (currentFilter === 'pending') filtered = bets.filter(b => b.outcome === 'pending');
+      else if (currentFilter === 'tb') filtered = bets.filter(b => b.advice.includes('ТБ'));
+      else if (currentFilter === 'tm') filtered = bets.filter(b => b.advice.includes('ТМ'));
+
+      if (filtered.length === 0) {
+        list.innerHTML = '<div class="text-muted text-center" style="padding:20px 0;">Нет ставок</div>';
+        return;
+      }
+      list.innerHTML = filtered.slice().reverse().map((b, idx) => {
+        const realIndex = bets.length - 1 - idx;
+        const outcomeClass = b.outcome === 'win' ? 'win' : b.outcome === 'loss' ? 'loss' : 'pending';
+        const emoji = b.outcome === 'win' ? '✅' : b.outcome === 'loss' ? '❌' : '⏳';
+        return `<div class="history-item" onclick="openEdit(${realIndex})">
+                    <div class="left">
+                        <span>${b.advice} ${b.tag ? '<span class="tag">'+b.tag+'</span>' : ''}</span>
+                        <span class="date">${b.date} — ${b.match}</span>
+                    </div>
+                    <div class="right">
+                        <span class="${outcomeClass}">${emoji} ${b.result}</span>
+                    </div>
+                </div>`;
+      }).join('');
+    }
+
+    function renderStats() {
+      const total = bets.length;
+      const wins = bets.filter(b => b.outcome === 'win').length;
+      const losses = bets.filter(b => b.outcome === 'loss').length;
+      const winRate = total > 0 ? Math.round((wins / (wins + losses)) * 100) : 0;
+      const balance = wins - losses;
+
+      let profit = 0;
+      bets.forEach(b => {
+        if (b.outcome === 'win') profit += (b.odds || 1.85) - 1;
+        else if (b.outcome === 'loss') profit -= 1;
+      });
+      const roi = total > 0 ? Math.round((profit / total) * 100) : 0;
+
+      document.getElementById('statTotal').textContent = total;
+      document.getElementById('statWinRate').textContent = (wins + losses) > 0 ? winRate + '%' : '0%';
+      document.getElementById('statBalance').textContent = balance;
+      document.getElementById('statROI').textContent = roi + '%';
+
+      const best = bets.filter(b => b.outcome === 'win');
+      document.getElementById('statBest').textContent = best.length > 0 ? best[best.length - 1].advice : '-';
+
+      const quarters = {};
+      bets.forEach(b => {
+        const q = b.period || 'unknown';
+        if (!quarters[q]) quarters[q] = { wins: 0, total: 0 };
+        quarters[q].total++;
+        if (b.outcome === 'win') quarters[q].wins++;
+      });
+      let bestQ = '-',
+        bestRate = 0;
+      for (const [q, data] of Object.entries(quarters)) {
+        const rate = data.total > 0 ? (data.wins / data.total) * 100 : 0;
+        if (rate > bestRate && data.total >= 2) { bestRate = rate;
+          bestQ = q; }
+      }
+      document.getElementById('statBestQuarter').textContent = bestQ !== '-' ? `${bestQ} (${Math.round(bestRate)}%)` :
+      '-';
+    }
+
+    function renderChart() {
+      const chart = document.getElementById('chartBars');
+      const last20 = bets.slice(-20);
+      let bal = 0;
+      const data = [];
+      last20.forEach(b => {
+        if (b.outcome === 'win') bal++;
+        else if (b.outcome === 'loss') bal--;
+        data.push(bal);
+      });
+      if (data.length === 0) {
+        chart.innerHTML = '<span style="color:#555;font-size:12px;margin:auto;">Нет данных</span>';
+        return;
+      }
+      const max = Math.max(1, ...data.map(Math.abs));
+      chart.innerHTML = data.map(v => {
+        const h = Math.max(4, (Math.abs(v) / max) * 44);
+        return `<div class="bar ${v < 0 ? 'loss' : ''}" style="height:${h}px;"></div>`;
+      }).join('');
+    }
+
+    // ===== СВАЙПЫ =====
+    let touchStartX = 0;
+    let currentScreen = 0;
+    const dots = document.querySelectorAll('.dot');
+    const container = document.getElementById('screensContainer');
+
+    container.addEventListener('touchstart', function(e) {
+      touchStartX = e.changedTouches[0].screenX;
+    }, { passive: true });
+
+    container.addEventListener('touchend', function(e) {
+      const diff = touchStartX - e.changedTouches[0].screenX;
+      if (Math.abs(diff) < 40) return;
+      if (diff > 0 && currentScreen < 3) {
+        currentScreen++;
+      } else if (diff < 0 && currentScreen > 0) {
+        currentScreen--;
+      } else {
+        return;
+      }
+      goToScreen(currentScreen);
+    }, { passive: true });
+
+    dots.forEach((dot, index) => {
+      dot.addEventListener('click', function() {
+        currentScreen = index;
+        goToScreen(currentScreen);
+      });
+    });
+
+    function goToScreen(index) {
+      const container = document.getElementById('screensContainer');
+      container.scrollTo({ left: index * window.innerWidth, behavior: 'smooth' });
+      dots.forEach((d, i) => {
+        d.classList.toggle('active', i === index);
+      });
+    }
+
+    container.addEventListener('scroll', function() {
+      const index = Math.round(this.scrollLeft / window.innerWidth);
+      if (index !== currentScreen && index >= 0 && index < 4) {
+        currentScreen = index;
+        dots.forEach((d, i) => {
+          d.classList.toggle('active', i === index);
+        });
+      }
+    }, { passive: true });
+
+    // ===== ЭКСПОРТ / ИМПОРТ =====
+    function exportData() {
+      const blob = new Blob([JSON.stringify(bets, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `totals_${new Date().toISOString().slice(0, 10)}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function importData(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const data = JSON.parse(e.target.result);
+          if (Array.isArray(data)) {
+            bets = data;
+            localStorage.setItem('bets', JSON.stringify(bets));
+            renderAll();
+            alert('✅ Данные импортированы!');
+          } else {
+            alert('❌ Неверный формат');
+          }
+        } catch { alert('❌ Ошибка чтения'); }
+      };
+      reader.readAsText(file);
+      event.target.value = '';
+    }
+
+    // ===== ОЧИСТКА =====
+    function clearHistory() {
+      if (confirm('Удалить всю историю ставок?')) {
+        bets = [];
+        localStorage.setItem('bets', JSON.stringify(bets));
+        renderAll();
+      }
+    }
+
+    function resetAll() {
+      if (confirm('Сбросить все данные включая историю?')) {
+        bets = [];
+        localStorage.setItem('bets', JSON.stringify(bets));
+        resetTimer();
+        renderAll();
+        alert('✅ Данные сброшены');
+      }
+    }
+
+    // ===== ИНИЦИАЛИЗАЦИЯ =====
+    loadSettings();
+
+    const hasRun = localStorage.getItem('hasRun');
+    if (!hasRun && settings.showTestData) {
+      document.getElementById('score').value = 28;
+      document.getElementById('diff').value = 14;
+      secondsLeft = 600;
+      updateTimerDisplay();
+      updateAll();
+      localStorage.setItem('hasRun', 'true');
+    } else if (!hasRun && !settings.showTestData) {
+      localStorage.setItem('hasRun', 'true');
+    }
+
+    renderAll();
+    resetTimer();
+
+    document.getElementById('score').addEventListener('input', updateAll);
+    document.getElementById('diff').addEventListener('input', updateAll);
+    document.getElementById('bkLine').addEventListener('input', updateExpectedTotal);
+
+    document.getElementById('sensitivity').addEventListener('input', function() {
+      document.getElementById('sensitivityValue').textContent = this.value + '%';
+    });
+
+    document.querySelectorAll('.period-buttons button, .live-button-wrap button').forEach(btn => {
+      btn.addEventListener('click', function() {
+        setPeriod(this.dataset.period, this);
+      });
+    });
+  </script>
+</body>
+</html>
